@@ -1,7 +1,22 @@
 import Layout from "../Layout"
 import { useState, useEffect } from "react"
+
+import {
+    MagnifyingGlassIcon,
+    XMarkIcon
+} from "@heroicons/react/24/outline"
+
+import {
+    motion,
+    AnimatePresence
+} from "framer-motion"
+
 export default function HomeIndex() {
     const [pets, setPets] = useState([])
+    const [selectedPets, setSelectedPets] = useState([])
+
+    const [searchParam, setSearchParam] = useState("")
+    const [selectedID, setSelectedID] = useState(null)
 
     async function getPets() {
         const res = await fetch("https://milliax.github.io/raw/web_dev/pets.json")
@@ -9,23 +24,21 @@ export default function HomeIndex() {
 
         console.log(response)
         setPets(response)
+        setSelectedPets(response)
+    }
 
-        // fetch("https://milliax.github.io/raw/web_dev/pets.json")
-        //     .then(e => {
-        //         // console.log(e)
-        //         return e.json()
-        //     })
-        //     .then(response => {
-        //         console.log(response)
-        //     })
-        // A();
-        // B();
-        // 過兩秒之後 印出A
-        // 再過一秒 會印出B
+    function updateSelectedPets() {
+        // console.log("update Pets!!")
 
-        // javascript
-        // 在這個程式中
-        // 過一秒印出B 再過一秒印出A
+        const param = searchParam
+        setSelectedPets(pets.filter((pet) => {
+            console.log(pet.name)
+            if (pet.name.includes(param) || pet.breed.includes(param)) {
+                return true
+            } else {
+                return false
+            }
+        }))
     }
 
     useEffect(() => {
@@ -35,17 +48,48 @@ export default function HomeIndex() {
 
     return (
         <Layout className="bg-gray-100">
+            <div className="flex flex-row justify-center mt-5">
+                <form onSubmit={(event) => {
+                    event.preventDefault();
+                    updateSelectedPets();
+                }} className="flex flex-row bg-white w-fit py-1 items-center rounded-full pl-2 pr-1">
+                    <input type="text" className="outline-none px-1 w-80"
+                        value={searchParam}
+                        onChange={(e) => { setSearchParam(e.target.value) }} />
+                    <MagnifyingGlassIcon className="h-5 px-2 cursor-pointer"
+                        onClick={() => { updateSelectedPets() }} />
+                </form>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 py-5 place-items-center">
-                {pets.map((pet) => (
-                    <div key={pet.name} className="w-44 h-32 bg-indigo-100 flex pt-3 pb-1 flex-col justify-between rounded-md shadow-md cursor-default select-none">
+                {selectedPets.map((pet, cnt) => (
+                    <motion.div key={pet.name} layoutId={pet.name} className="w-44 h-32 bg-indigo-100 flex pt-3 pb-1 flex-col justify-between rounded-md shadow-md cursor-pointer select-none" onClick={() => { setSelectedID(`${cnt}`) }}>
                         <div className="flex justify-center">
                             <img src={pet.imageURL} alt={`${pet.name}的照片`} className="w-20 h-20 object-cover rounded-lg" />
                         </div>
                         <div className="w-full text-center">
                             {pet.name} {pet.breed}
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
+
+                <AnimatePresence initial={false}>
+                    {selectedID && <motion.div layout={selectedID} className="fixed w-80 h-80 top-0 mt-[calc(50vh-10rem)] left-0 ml-[calc(50%-10rem)] bg-white rounded-lg border border-gray-600">
+                        <div className="flex flex-col px-5 py-3">
+                            <XMarkIcon onClick={() => { setSelectedID(null) }} className="h-6 self-end text-red-500 hover:text-red-800 cursor-pointer" />
+                            <div>
+                                <div className="flex justify-center">
+                                    <img src={selectedPets[selectedID].imageURL} alt={`${selectedPets[selectedID].name}的照片`} className="w-20 h-20 object-cover rounded-lg" />
+                                </div>
+                                <div className="w-full text-center">
+                                    {selectedPets[selectedID].name} {selectedPets[selectedID].breed}
+                                </div>
+                                <div className="h-40 overflow-y-auto">
+                                    {selectedPets[selectedID].description}
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>}
+                </AnimatePresence>
             </div>
         </Layout>
     )
