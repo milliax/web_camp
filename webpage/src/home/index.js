@@ -61,19 +61,25 @@ export default function HomeIndex() {
                 </form>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 py-5 place-items-center">
-                {selectedPets.map((pet, cnt) => (
-                    <motion.div key={pet.name} layoutId={pet.name} className="w-44 h-32 bg-indigo-100 flex pt-3 pb-1 flex-col justify-between rounded-md shadow-md cursor-pointer select-none" onClick={() => { setSelectedID(`${cnt}`) }}>
-                        <div className="flex justify-center">
-                            <img src={pet.imageURL} alt={`${pet.name}的照片`} className="w-20 h-20 object-cover rounded-lg" />
-                        </div>
-                        <div className="w-full text-center">
-                            {pet.name} {pet.breed}
-                        </div>
-                    </motion.div>
-                ))}
+                {selectedPets.map((pet, cnt) => {
+                    if (`${cnt}` === selectedID) {
+                        return <div />
+                    } else {
+                        return <motion.div key={pet.name} layoutId={pet.name} className={`w-44 h-32 bg-indigo-100 flex pt-3 pb-1 flex-col justify-between rounded-md shadow-md cursor-pointer select-none`} onClick={() => { setSelectedID(`${cnt}`) }}
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                            <div className="flex justify-center">
+                                <img src={pet.imageURL} alt={`${pet.name}的照片`} className="w-20 h-20 object-cover rounded-lg" />
+                            </div>
+                            <div className="w-full text-center">
+                                {pet.name} {pet.breed}
+                            </div>
+                        </motion.div>
+                    }
+                })}
 
                 <AnimatePresence initial={false}>
-                    {selectedID && <motion.div layout={selectedID} className="fixed w-80 h-80 top-0 mt-[calc(50vh-10rem)] left-0 ml-[calc(50%-10rem)] bg-white rounded-lg border border-gray-600">
+                    {selectedID && <motion.div layout={selectedID} className="fixed w-80 h-80 top-0 mt-[calc(50vh-10rem)] left-0 ml-[calc(50%-10rem)] bg-white rounded-lg border border-gray-600"
+                        key="model" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         <div className="flex flex-col px-5 py-3">
                             <XMarkIcon onClick={() => { setSelectedID(null) }} className="h-6 self-end text-red-500 hover:text-red-800 cursor-pointer" />
                             <div>
